@@ -1,121 +1,212 @@
 # ☁️ Cloud-Based File Storage System
 
-The Cloud-Based File Storage System is a secure, lightweight web application built with Flask that enables users to upload, download, and share files easily through a personal account-based system. Designed for simplicity and modularity, this application replicates the core functionalities of large-scale cloud storage providers while remaining small, transparent, and educational. It offers an intuitive user experience, focusing on core operations like secure login, file management, and generating shareable download links that do not require an account for access.
+The **Cloud-Based File Storage System** is a secure, lightweight web application built using **Flask**, **MySQL**, and the **Google Drive API**.  
+It allows users to **upload**, **download**, and **share** files safely and efficiently through a personal dashboard interface.
 
-This project was developed to deepen understanding of full-stack web development concepts, particularly around backend authentication, file system management, database operations, and secure data handling. By utilizing a MySQL database in combination with SQLAlchemy ORM, the system efficiently stores and retrieves user information and file metadata. The application currently stores uploaded files locally, but its modular design allows easy extension to integrate external cloud storage services in future iterations. Whether used as a foundation for more complex systems or as a standalone solution for secure file management, the Cloud-Based File Storage System offers a practical, extensible model for lightweight cloud infrastructure development.
+Designed for clarity, modularity, and educational purposes, this project replicates the essential features of larger platforms (like Dropbox or Google Drive) while remaining fully open-source, customizable, and lightweight.
 
 ---
 
-## Table of Contents
+## 📋 Table of Contents
 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Architecture Overview](#architecture-overview)
+- [System Architecture](#system-architecture)
 - [Folder Structure](#folder-structure)
 - [Setup Instructions](#setup-instructions)
 - [Usage Guide](#usage-guide)
 - [API Endpoints](#api-endpoints)
+- [Environment Variables](#environment-variables)
 - [Contributors](#contributors)
-  
----
-
-## Features
-
-Users can create an account, securely log in, and manage their personal file storage. Uploaded files are saved to the server and linked to the user’s account through the database. Files can be downloaded at any time and can also be shared externally through secure links that do not require a recipient to log in. Access control and file integrity are enforced throughout the system to ensure user data remains protected.
-
-The system is structured modularly, separating application logic, database models, routing, and front-end templates for clarity and maintainability. Passwords are securely hashed before storage, and protected routes ensure that only authenticated users can interact with sensitive actions.
+- [License](#license)
 
 ---
 
-## Tech Stack
+## ✨ Features
 
-- **Frontend**: HTML, CSS, Jinja2
-- **Backend**: Flask (Python)
-- **Database**: MySQL with SQLAlchemy ORM
-- **Auth**: Flask-Login
-- **Cloud Storage**: Google Drive API (OAuth2)
-- **Others**: PyMySQL, Flask Blueprints
+- **User Authentication**: Secure registration, login, and session management via Flask-Login.
+- **File Upload**: Upload and store various file formats (PDF, PNG, DOCX) up to 10MB.
+- **File Download**: Users can view and download previously uploaded files securely.
+- **Shareable Links**: Generate secure, time-limited shareable links via Google Drive integration.
+- **Metadata Tracking**: All uploads are logged into a **MySQL** database, including file names, timestamps, user IDs, and Google Drive IDs.
+- **Modular Codebase**: Clean separation of backend, frontend, and service logic for maintainability.
 
 ---
 
-## Architecture Overview
+## 🛠️ Tech Stack
+
+| Layer       | Technology                    |
+|-------------|--------------------------------|
+| Frontend    | HTML, CSS, Jinja2 Templates, Bootstrap |
+| Backend     | Python (Flask Framework)       |
+| Database    | MySQL + SQLAlchemy ORM         |
+| Cloud Storage | Google Drive API (OAuth2)    |
+| Auth        | Flask-Login for session management |
+| Others      | Python Libraries: PyMySQL, dotenv |
+
+---
+
+## 🏗️ System Architecture
 
 ```text
-+-------------+
-|   Browser   |  ← User Interface (HTML templates)
-+------+------+ 
-       |
-       v
-+-------------+
-|   Flask App |  ← Handles routing, auth, and logic
-+------+------+ 
-       |
-       v
-+--------------------+
-| Flask Blueprints   |
-| (Auth & Files)     |
-+--------+-----------+
-         |
-         v
-+------------------+
-|  SQLAlchemy ORM  | ← Communicates with MySQL
-+--------+---------+
-         |
-         v
-+------------------+
-|   MySQL Database |
-+------------------+
++----------------+
+|   Web Browser  |   ← (HTML, CSS, JS)
++-------+--------+
+        |
+        v
++----------------+
+|  Flask Server  |   ← (Routing, Authentication, API Calls)
++-------+--------+
+        |
+        v
++----------------+      +----------------+
+|  MySQL Database |     | Google Drive API|
+| (User + Files)  |     | (File Storage)   |
++----------------+      +----------------+
 ```
 
-The application follows a modular MVC-inspired structure. User requests are routed through Flask endpoints, invoking database operations managed via SQLAlchemy models. Files are uploaded securely to a server-side directory, and associated metadata, including user ownership and shareable tokens, is stored in MySQL tables. The front-end templates dynamically render user-specific views based on authenticated sessions. Secure sharing links are generated with unique tokens to control access without requiring account login from recipients.
+---
+
+## 📂 Folder Structure
+
+```text
+cloud-storage-system/
+│
+├── app/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── models.py
+│   ├── services/
+│   │   └── google_drive.py
+│   └── files/
+│       └── routes.py
+│
+├── tests/
+│   └── test_api.py
+│
+├── templates/
+│   ├── index.html
+│   └── login.html
+│
+├── static/
+│   ├── style.css
+│   └── script.js
+│
+├── requirements.txt
+├── .gitignore
+├── .env.example
+├── README.md
+└── LICENSE
+```
 
 ---
 
-## Folder Structure
+## ⚙️ Setup Instructions
 
-The project is organized to maintain a clean separation between components. The `/app` directory contains the application factory, authentication routes, file management routes, and database models. HTML templates for user-facing pages are located in `/templates`, and static assets such as CSS files are stored in `/static`. Uploaded files are saved to a secure `/uploads` directory on the server. Configuration settings are managed in the main application file.
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/memefiele1/Cloud-Based-File-Storage-System.git
+   cd Cloud-Based-File-Storage-System
+   ```
+
+2. **Create a Virtual Environment**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # For Mac/Linux
+   venv\Scripts\activate     # For Windows
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set Up Environment Variables**
+   - Copy `.env.example` to `.env`
+   - Fill in your **MySQL credentials**, **Google OAuth2 Client ID/Secret**, and **Drive Folder ID**
+
+5. **Initialize the Database**
+   ```bash
+   flask shell
+   >>> from app import db
+   >>> db.create_all()
+   >>> exit()
+   ```
+
+6. **Run the App**
+   ```bash
+   flask run
+   ```
+
+7. **Access It**
+   - Visit `http://localhost:5000/` in your browser 🚀
 
 ---
 
-## Setup Instructions
+## 🖥️ Usage Guide
 
-To set up the Cloud-Based File Storage System locally, begin by cloning the repository to your machine using Git. Open your terminal, navigate to the directory where you want to place the project, and run git clone <repository_link>. After cloning, navigate into the project folder using cd Cloud-Based-File-Storage-System.
+- **Sign Up** → Create a new user account.
+- **Login** → Access your private dashboard.
+- **Upload Files** → Upload PDFs, Word Docs, Images (up to 10MB).
+- **Manage Files** → See a table of your files, download them, or generate share links.
+- **Logout** → End your session securely.
 
-Ensure you have Python installed on your system. It is recommended to use a virtual environment to manage dependencies and avoid conflicts. Create and activate a virtual environment by running python -m venv venv followed by source venv/bin/activate on macOS/Linux or venv\\Scripts\\activate on Windows.
-
-Once inside the virtual environment, install all required Python packages by executing pip install -r requirements.txt. This will install Flask, SQLAlchemy, Flask-Login, PyMySQL, and any other dependencies necessary for running the application.
-
-Before launching the application, set up a MySQL database. Create a new database instance locally, and update the database URI in the application's configuration file to include your MySQL username, password, and database name. The database connection string typically follows the format mysql+pymysql://username:password@localhost/databasename.
-
-With the database configured, initialize the database tables. You can achieve this by opening a Flask shell (flask shell) and running the db.create_all() command to create the necessary schema based on the defined models. Alternatively, you may execute any provided database setup scripts.
-
-After completing these setup steps, you are ready to run the application. Start the Flask development server by running flask run in your terminal. The server will launch locally, typically accessible via http://127.0.0.1:5000/ in your browser. From there, you can register a new user, log in, and start uploading, downloading, and sharing files securely.
+All file metadata is automatically synced with the MySQL database.  
+Uploaded files are securely stored in your designated **Google Drive** folder.
 
 ---
 
-## Usage Guide
+## 📡 API Endpoints
 
-Once the application is running locally, users are greeted with a login page. If a user does not yet have an account, they can navigate to the registration page and create a new account by providing a username, a valid email address, and a secure password. Upon successful registration, users are redirected to the login page to authenticate themselves using their new credentials. After logging in, users are taken to their personal dashboard. From the dashboard, users can upload files directly from their local machine. Each uploaded file is securely saved on the server and recorded in the MySQL database along with metadata such as the original filename and ownership information. Users can view a list of all files they have uploaded, download any of their files, or delete them if necessary. The system also allows users to generate a secure shareable link for any uploaded file. By selecting the "Share" option next to a file, the system creates a unique time-limited link that can be shared with others. Recipients with the link can download the shared file without needing to create an account, making file sharing simple and efficient while maintaining access control through token validation.
-
-Users can log out at any time to end their session securely. Once logged out, access to protected resources is restricted until the user logs in again. The system provides clear feedback and prompts throughout all user actions, ensuring a smooth, intuitive experience from account creation to file management and sharing.
+| Route                    | Method | Description                      |
+|---------------------------|--------|----------------------------------|
+| `/register`               | POST   | Register a new user              |
+| `/login`                  | POST   | Authenticate user                |
+| `/logout`                 | GET    | Log out user                     |
+| `/upload`                 | POST   | Upload a new file                |
+| `/files`                  | GET    | List uploaded files              |
+| `/download/<file_id>`      | GET    | Download a file                  |
+| `/share/<file_id>`         | GET    | Generate a shareable download link |
+| `/shared/<token>`          | GET    | Download file via share token    |
 
 ---
 
-## API Endpoints
+## 🔐 Environment Variables (.env.example)
 
-The application exposes several key routes to manage user actions and file storage:
+```env
+# Flask Settings
+FLASK_APP=run.py
+FLASK_ENV=development
+SECRET_KEY=your_flask_secret_key
 
-- `/register`: Handles new user registrations.
-- `/login`: Authenticates users and creates sessions.
-- `/logout`: Ends the user's session.
-- `/upload`: Accepts file uploads for authenticated users.
-- `/download/<file_id>`: Retrieves files for download by the owner.
-- `/share/<file_id>`: Generates a secure, time-limited share link for a file.
-- `/shared/<token>`: Allows public access to a file via a valid share token.
+# MySQL Database Settings
+MYSQL_USER=your_mysql_username
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_HOST=localhost
+MYSQL_DATABASE=your_database_name
 
-All sensitive actions are protected behind authentication middleware except for shared link access, which uses token validation to control external downloads.
+# Google OAuth2 Settings
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_DRIVE_FOLDER_ID=your_google_drive_folder_id
+```
 
-## Contributors
+---
 
-This project was developed by Gunn Madan, Miracle Emefiele, Morewa Omolabi, and Ethan Munji as part of a cloud computing project course. Contributions included backend development, database design, authentication setup, file storage handling, and front-end template design. The system architecture and implementation were guided with feedback from the course instructor.
+## 👥 Contributors
+
+| Name              | Role                  |
+|-------------------|------------------------|
+| Miracle Emefiele  | Frontend Developer, GitHub Management |
+| Morewa Omolabi    | Backend Developer, API Integrations  |
+| Gunn Madan        | Testing and QA Lead     |
+| Ethan Munji       | Documentation and Reporting Lead |
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
 
